@@ -1,0 +1,55 @@
+Netflix Analysis
+#In this SQL code, I'm querying a database that is holding Netflix data to answer questions about the data.
+#PostgreSQL database: https://bit.io/CharlotteChaze/BreakIntoTech
+
+
+1. How many movie titles are there in the database? (movies only, not tv shows)
+
+SELECT count(*)
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+WHERE type = 'Movie';
+
+#6131
+
+
+2. When was the most recent batch of tv shows and/or movies added to the database?
+SEELCT max(date(date_added))
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info";
+
+or
+
+SELECT date(date_added)
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+WHERE date(date_added) IS NOT null
+ORDER BY date(date_added) DESC
+LIMIT 1;
+
+#2021-09-25
+
+
+3. List all the movies and tv shows in alphabetical order.
+
+SELECT title
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+ORDER BY title ASC;
+
+
+4. Who was the Director for the movie Bright Star?
+
+SELECT people.director
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info" as titles
+RIGHT JOIN "CharlotteChaze/BreakIntoTech"."netflix_people" as people
+ON titles.show_id = people.show_id
+WHERE titles.title = 'Bright Star';
+
+#Jane Campion
+
+
+5. What is the oldest movie in the database and what year was it made?
+
+SELECT title, release_year
+FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+ORDER BY release_year
+LIMIT 1;
+
+# Pioneers: First Women Filmmakers*
