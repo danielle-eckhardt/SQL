@@ -1,4 +1,16 @@
+In this SQL, I am querying a database with multiple tables in it to quantify statistics about the customer and order data for a hypothetical company.
 Using SQLite and connected to a database from CharlotteChaze BreakIntoTech Analytics Course.
+
+Database name: BIT_DB
+
+Tables: 
+JanSales (orderID, Product, Quantity, price, orderdate, location)
+FebSales (orderID, Product, Quantity, price, orderdate, location)
+MarSales (orderID, Product, Quantity, price, orderdate, location)
+AprSales (orderID, Product, Quantity, price, orderdate, location)
+MaySales (orderID, Product, Quantity, price, orderdate, location)
+customers (order_id, acctnum)
+
 
 1. How many orders were placed in January?
 SELECT count(*)
@@ -17,51 +29,61 @@ AND product = 'iPhone';
 -- 379
 
 3. Select the customer account numbers for all the orders that were placed in February.
-SELECT c.acctnum
+SELECT DISTINCT c.acctnum
 FROM bit_db.febsales as f
 JOIN bit_db.customers as c
-ON f.orderID = c.order_id;
+ON f.orderID = c.order_id
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID';
 
 
 4. Which product was the cheapest one sold in January, and what was the price?
-SELECT product, min(price)
-FROM bit_db.JanSales;
+SELECT DISTINCT product, price
+FROM bit_db.JanSales
+ORDER BY price ASC
+LIMIT 1;
 -- AAA Batteries (4-pack) 2.99
 
 
 5. What is the total revenue for each product sold in January? 
-SELECT product, sum(Quantity * price) as total_revenue
+SELECT product, sum(Quantity)*price as total_revenue
 FROM bit_db.JanSales
 GROUP BY product;
--- 20in Monitor	23647.85000000008
-27in 4K Gaming Monitor	121676.88000000064
-27in FHD Monitor	62845.80999999975
-34in Ultrawide Monitor	119316.86000000063
-AA Batteries (4-pack)	5472.000000000065
-AAA Batteries (4-pack)	4772.039999999888
+-- product	total_revenue
+20in Monitor	23647.85
+27in 4K Gaming Monitor	121676.88
+27in FHD Monitor	62845.810000000005
+34in Ultrawide Monitor	119316.86
+AA Batteries (4-pack)	5472
+AAA Batteries (4-pack)	4772.04
 Apple Airpods Headphones	122100
-Bose SoundSport Headphones	65893.40999999958
+Bose SoundSport Headphones	65893.41
 Flatscreen TV	72900
 Google Phone	190800
 LG Dryer	23400
 LG Washing Machine	25200
-Lightning Charging Cable	17207.450000000306
+Lightning Charging Cable	17207.45
 Macbook Pro Laptop	399500
 Product	0
-ThinkPad Laptop	216997.82999999952
-USB-C Charging Cable	15343.800000000268
+ThinkPad Laptop	216997.83000000002
+USB-C Charging Cable	15343.8
 Vareebadd Phone	50000
-Wired Headphones	12961.189999999811
+Wired Headphones	12961.19
 iPhone	265300
 
 
 6. Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
-SELECT *, sum(Quantity*price) as total_revenue
+SELECT sum(Quantity) as totalquantity, product, sum(Quantity*price) as total_revenue
 FROM bit_db.FebSales
 WHERE location = '548 Lincoln St, Seattle, WA 98101';
--- 150506	AA Batteries (4-pack)	2	3.84	02/28/19 20:32	548 Lincoln St, Seattle, WA 98101	7.68
+-- 2	AA Batteries (4-pack)	7.68
 
 
 7. How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
-
+SELECT f.orderID, f.orderdate, count(distinct c.acctnum), avg(Quantity*price) as avg_revenue
+FROM bit_db.FebSales as f
+LEFT JOIN bit_db.customers as c
+ON f.orderID = c.order_id
+WHERE f.Quantity > 2 AND length(orderid) = 6 AND orderid <> 'Order ID';
+-- 278 customers and $13.83 in average amount spent
 
