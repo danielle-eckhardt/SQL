@@ -87,3 +87,28 @@ ON f.orderID = c.order_id
 WHERE f.Quantity > 2 AND length(orderid) = 6 AND orderid <> 'Order ID';
 -- 278 customers and $13.83 in average amount spent
 
+8. List all the products sold in Los Angeles in February, and include how many of each were sold.
+SELECT Product, sum(Quantity)
+FROM bit_db.FebSales
+WHERE location like '%Los Angeles%'
+GROUP BY product;
+--Product	sum(Quantity)
+20in Monitor	44
+27in 4K Gaming Monitor	70
+27in FHD Monitor	81
+34in Ultrawide Monitor	63
+AA Batteries (4-pack)	293
+AAA Batteries (4-pack)	351
+Apple Airpods Headphones	140
+Bose SoundSport Headphones	131
+Flatscreen TV	36
+Google Phone	52
+LG Dryer	5
+LG Washing Machine	6
+Lightning Charging Cable	243
+Macbook Pro Laptop	46
+ThinkPad Laptop	42
+USB-C Charging Cable	271
+Vareebadd Phone	25
+Wired Headphones	191
+iPhone	71
