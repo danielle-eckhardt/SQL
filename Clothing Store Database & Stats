@@ -46,7 +46,6 @@ LIMIT 1;
        74	     Earrings */
 /* In other words, the most expensive product is 'Earrings' at a price of $74 */
 
-
 /* What product has the lowest quantity? */
 SELECT sum(quantity), category
 FROM inventory
