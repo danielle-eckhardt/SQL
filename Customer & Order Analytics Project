@@ -1,0 +1,67 @@
+Using SQLite and connected to a database from CharlotteChaze BreakIntoTech Analytics Course.
+
+1. How many orders were placed in January?
+SELECT count(*)
+FROM bit_db.jansales
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID'; 
+-- 9681
+
+
+2. How many of those orders were for an iPhone?
+SELECT count(*)
+FROM bit_db.jansales
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID'
+AND product = 'iPhone';
+-- 379
+
+3. Select the customer account numbers for all the orders that were placed in February.
+SELECT c.acctnum
+FROM bit_db.febsales as f
+JOIN bit_db.customers as c
+ON f.orderID = c.order_id;
+
+
+4. Which product was the cheapest one sold in January, and what was the price?
+SELECT product, min(price)
+FROM bit_db.JanSales;
+-- AAA Batteries (4-pack) 2.99
+
+
+5. What is the total revenue for each product sold in January? 
+SELECT product, sum(Quantity * price) as total_revenue
+FROM bit_db.JanSales
+GROUP BY product;
+-- 20in Monitor	23647.85000000008
+27in 4K Gaming Monitor	121676.88000000064
+27in FHD Monitor	62845.80999999975
+34in Ultrawide Monitor	119316.86000000063
+AA Batteries (4-pack)	5472.000000000065
+AAA Batteries (4-pack)	4772.039999999888
+Apple Airpods Headphones	122100
+Bose SoundSport Headphones	65893.40999999958
+Flatscreen TV	72900
+Google Phone	190800
+LG Dryer	23400
+LG Washing Machine	25200
+Lightning Charging Cable	17207.450000000306
+Macbook Pro Laptop	399500
+Product	0
+ThinkPad Laptop	216997.82999999952
+USB-C Charging Cable	15343.800000000268
+Vareebadd Phone	50000
+Wired Headphones	12961.189999999811
+iPhone	265300
+
+
+6. Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+SELECT *, sum(Quantity*price) as total_revenue
+FROM bit_db.FebSales
+WHERE location = '548 Lincoln St, Seattle, WA 98101';
+-- 150506	AA Batteries (4-pack)	2	3.84	02/28/19 20:32	548 Lincoln St, Seattle, WA 98101	7.68
+
+
+7. How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+
+
