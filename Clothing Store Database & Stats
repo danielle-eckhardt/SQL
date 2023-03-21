@@ -1,0 +1,60 @@
+/* Creating a new database for a hypothetical clothing store */
+
+CREATE TABLE inventory (id INTEGER PRIMARY KEY, category TEXT, quantity INTEGER, color TEXT, price INTEGER);
+
+INSERT INTO inventory VALUES (1, "Necklace", 4, "silver", 14);
+INSERT INTO inventory VALUES (2, "Necklace", 7, "white gold", 50);
+INSERT INTO inventory VALUES (3, "Scarf", 10, "blue", 10);
+INSERT INTO inventory VALUES (4, "Scarf", 8, "green", 15);
+INSERT INTO inventory VALUES (5, "Short Sleeve", 3, "white", 15);
+INSERT INTO inventory VALUES (6, "Short Sleeve", 7, "yellow", 23.50);
+INSERT INTO inventory VALUES (7, "Long Sleeve", 8, "black", 19);
+INSERT INTO inventory VALUES (8, "Sandals", 2, "tan", 8);
+INSERT INTO inventory VALUES (9, "Sandals", 7, "tan", 11);
+INSERT INTO inventory VALUES (10, "Boots", 6, "grey", 40);
+INSERT INTO inventory VALUES (11, "Boots", 6, "brown", 32.10);
+INSERT INTO inventory VALUES (12, "Socks", 10, "white", 6);
+INSERT INTO inventory VALUES (13, "Jeans", 13, "denim", 50);
+INSERT INTO inventory VALUES (14, "Legging", 6, "multicolor", 25);
+INSERT INTO inventory VALUES (15, "Earrings", 4, "gold", 74);
+INSERT INTO inventory VALUES (16, "Underwear", 20, "purple", 4);
+INSERT INTO inventory VALUES (17, "Hair Clip", 19, "red", 3);
+INSERT INTO inventory VALUES (18, "Bra", 6, "beige", 33);
+INSERT INTO inventory VALUES (19, "Strapless Top", 4, "yellow", 21);
+INSERT INTO inventory VALUES (20, "Strapless Top", 12, "yellow", 18.43);
+INSERT INTO inventory VALUES (21, "Gloves", 2, "brown", 10);
+INSERT INTO inventory VALUES (22, "Gloves", 6, "white", 4.50);
+INSERT INTO inventory VALUES (23, "Long Sleeve", 21, "multicolor", 12.75);
+INSERT INTO inventory VALUES (24, "Long Sleeve", 21, "teal", 16.10);
+
+
+/* Creating statistics */
+
+/* What are the clothing categories with the most inventory? */
+SELECT category
+FROM inventory
+WHERE quantity > 15;
+/* Underwear, Clawclip, Long Sleeve */
+
+/* What is the most expensive product? */
+SELECT max(price), category
+FROM inventory
+GROUP BY category
+ORDER BY max(price) DESC
+LIMIT 1;
+/* max(price)	category
+       74	     Earrings */
+/* In other words, the most expensive product is 'Earrings' at a price of $74 */
+
+
+/* What product has the lowest quantity? */
+SELECT sum(quantity), category
+FROM inventory
+GROUP BY category
+ORDER BY sum(quantity)
+LIMIT 1;
+
+/* sum(quantity)	category
+       4	        Earrings*/
+/* In other words, the product with the lowest quanity is 'Earrings' with only 4 items */
+
