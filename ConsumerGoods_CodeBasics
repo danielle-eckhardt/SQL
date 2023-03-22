@@ -164,6 +164,36 @@ LIMIT 1) b
 ON 
 a.product_code = b.product_code;
 
+/* Use subqueries to get the max and min manufacturing costs separately and then join them with the dim_product table to get the product information.
+
+Use aliases to make the query more readable.
+
+Use ORDER BY and LIMIT to get the highest and lowest costs instead of using subqueries with LIMIT. */
+
+SELECT 
+  d.product_code, 
+  d.product, 
+  f.manufacturing_cost
+FROM 
+  fact_manufacturing_cost f 
+  JOIN dim_product d ON f.product_code = d.product_code 
+WHERE 
+  f.manufacturing_cost = (
+    SELECT 
+      MAX(manufacturing_cost) 
+    FROM 
+      fact_manufacturing_cost
+  ) 
+  OR 
+  f.manufacturing_cost = (
+    SELECT 
+      MIN(manufacturing_cost) 
+    FROM 
+      fact_manufacturing_cost
+  )
+ORDER BY 
+  f.manufacturing_cost;
+
 /*
 A0118150101	
 AQ Dracula HDD – 3.5 Inch SATA 6 Gb/s 5400 RPM 256 MB Cache	
@@ -243,14 +273,19 @@ channel
 gross_sales_mln
 percentage*/
 
-SELECT d.channel, sum(fgp.gross_price * fsm.sold_quantity) as gross_sales, (sum(fgp.gross_price * fsm.sold_quantity/sum(sum(fgp.gross_price * fsm.sold_quantity))) as percent_contrib
-FROM dim_customer d
-JOIN fact_sales_monthly fsm
-ON d.customer_code = fsm.customer_code
-JOIN fact_gross_price fgp
-ON fgp.product_code = fsm.product_code
-WHERE fsm.fiscal_year = 2021
-GROUP BY d.channel;
+SELECT 
+  d.channel, 
+  SUM(fgp.gross_price * fsm.sold_quantity) AS gross_sales_mln, 
+  (SUM(fgp.gross_price * fsm.sold_quantity) / SUM(SUM(fgp.gross_price * fsm.sold_quantity)) OVER ()) * 100 AS percentage
+FROM 
+  dim_customer d
+  JOIN fact_sales_monthly fsm ON d.customer_code = fsm.customer_code
+  JOIN fact_gross_price fgp ON fgp.product_code = fsm.product_code
+WHERE 
+  fsm.fiscal_year = 2021
+GROUP BY 
+  d.channel;
+
 
 
 /*Get the Top 3 products in each division that have a high
@@ -258,20 +293,39 @@ total_sold_quantity in the fiscal_year 2021? The final output contains these
 fields,
 division
 product_code
-codebasics.io
 product
 total_sold_quantity
 rank_order
 */
 
-SELECT d.division, d.product_code, d.product, sum(fsm.sold_quantity) as total_sold_quantity, rank () over (order by sum(fsm.sold_quantity)) as rank_no
-FROM fact_sales_monthly fsm
-JOIN dim_product d
-ON fsm.product_code = d.product_code
-WHERE fiscal_year = 2021
-GROUP BY d.division, d.product_code, d.product
-ORDER BY total_sold_quantity DESC
-LIMIT 3;
+SELECT 
+  division, 
+  product_code, 
+  product, 
+  total_sold_quantity, 
+  rank_no
+FROM (
+  SELECT 
+    d.division, 
+    d.product_code, 
+    d.product, 
+    SUM(fsm.sold_quantity) AS total_sold_quantity, 
+    RANK() OVER (PARTITION BY d.division ORDER BY SUM(fsm.sold_quantity) DESC) AS rank_no
+  FROM 
+    fact_sales_monthly fsm 
+    JOIN dim_product d ON fsm.product_code = d.product_code 
+  WHERE 
+    fsm.fiscal_year = 2021
+  GROUP BY 
+    d.division, 
+    d.product_code, 
+    d.product
+) AS t
+WHERE 
+  rank_no <= 3
+ORDER BY 
+  division, 
+  rank_no;
 
 /*
 N & S	A6720160103	AQ Pen Drive 2 IN 1	701373	334
