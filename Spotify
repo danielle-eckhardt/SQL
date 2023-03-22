@@ -1,0 +1,161 @@
+Spotify Analysis on Top 50 Songs in 2021
+
+For this project, I downloaded Spotify data from Kaggle.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data using the following SQL. 
+
+
+1. Which artist had the most songs out of the top 50 in 2021 and how many songs was it?
+SELECT artist_name, count(artist_name) as numberoftracks
+FROM bit_db.Spotifydata
+GROUP BY artist_name
+ORDER BY numberoftracks DESC;
+-- Olivia Rodrigo with 4 songs and Doja Cat with 4 songs.
+
+2. What was the average, lowest, and highest popularity rating of the top 50 songs?
+SELECT avg(popularity) as avg_pop, min(popularity) as lowest_pop, max(popularity) as highest_pop
+FROM bit_db.Spotifydata;
+-- avg_pop	lowest_pop	highest_pop
+      86.8     	67	      95
+
+3. Which songs and artist had an energy rating higher than 0.8? In other words, which songs had high energetic tunes?
+SELECT artist_name, track_name
+FROM bit_db.Spotifydata
+WHERE energy > 0.8;
+- There were 9 out of thw 50 songs with an energy rating higher than 0.8
+artist_name	track_name
+Dua Lipa	Levitating (feat. DaBaby)
+Ed Sheeran	Bad Habits
+The Weeknd	Save Your Tears
+Harry Styles	Watermelon Sugar
+Riton	Friday (feat. Mufasa & Hypeman) - Dopamine Re-Edit
+Ariana Grande	positions
+The Neighbourhood	Sweater Weather
+J Balvin	Qué Más Pues?
+Joel Corry	Head & Heart (feat. MNEK)
+
+
+4. Which songs and artist had fast tempo (greater than 120 BPM) AND high energy (greater than 0.80)?
+SELECT artist_name, track_name
+FROM bit_db.Spotifydata
+WHERE energy > 0.8 AND tempo > 120;
+--artist_name	track_name
+Ed Sheeran	Bad Habits
+Riton	Friday (feat. Mufasa & Hypeman) - Dopamine Re-Edit
+Ariana Grande	positions
+The Neighbourhood	Sweater Weather
+Joel Corry	Head & Heart (feat. MNEK)
+
+5. Which song had the longest duration?
+SELECT artist_name, track_name, max(duration_ms)
+FROM bit_db.Spotifydata
+GROUP BY artist_name, track_name
+ORDER BY max(duration_ms) DESC
+LIMIT 1
+
+or
+SELECT artist_name, track_name, max(duration_ms)
+FROM bit_db.Spotifydata;
+-- artist_name	track_name	max(duration_ms)
+Farruko	Pepas	287120
+
+
+6.  Which song had the shortest duration?
+SELECT artist_name, track_name, min(duration_ms)
+FROM bit_db.Spotifydata;
+--artist_name	track_name	min(duration_ms)
+Masked Wolf	Astronaut In The Ocean	132780
+
+6. What was the average duration of a song in the top 50?
+SELECT avg(duration_ms)
+FROM bit_db.Spotifydata
+-- 197488.4
+
+7. Determine the avg popularity, danceability, and energy by artist.
+SELECT artist_name, avg(popularity), avg(danceability), avg(energy)
+FROM bit_db.Spotifydata
+GROUP BY artist_name;
+--artist_name	avg(popularity)	avg(danceability)	avg(energy)
+24kGoldn	89	0.701	0.716
+Ariana Grande	86.5	0.7835	0.6935
+BTS	69	0.7525	0.612
+Bad Bunny	89.33333333333333	0.74366666666667	0.613
+Bruno Mars	86	0.586	0.616
+Doja Cat	90.75	0.75025	0.63525
+Dua Lipa	86.5	0.7475	0.809
+Duncan Laurence	78	0.453	0.35
+Ed Sheeran	95	0.807	0.893
+Farruko	86	0.762	0.766
+Giveon	86	0.449	0.465
+Glass Animals	94	0.761	0.525
+Harry Styles	90	0.548	0.816
+Internet Money	81	0.8	0.658
+J Balvin	79	0.903	0.817
+Joel Corry	86	0.734	0.874
+Justin Bieber	90	0.677	0.696
+Kali Uchis	87	0.653	0.524
+Lewis Capaldi	88	0.501	0.405
+Lil Nas X	90	0.667	0.597
+Los Legendarios	82	0.849	0.701
+Masked Wolf	77	0.778	0.695
+Myke Towers	82	0.713	0.617
+Måneskin	90.5	0.732	0.704
+Olivia Rodrigo	92.25	0.4865	0.5115
+Polo G	82	0.789	0.536
+Rauw Alejandro	69	0.78	0.719
+Riton	88	0.824	0.862
+SZA	86	0.436	0.655
+Sebastian Yatra	86	0.715	0.622
+Tate McRae	88	0.667	0.373
+The Kid LAROI	88.5	0.6265	0.5885
+The Neighbourhood	92	0.612	0.807
+The Weeknd	91.5	0.597	0.778
+Tiësto	88	0.798	0.62
+
+
+8. Who are the Top 10 artists tracks based soley off popularity ratings?
+SELECT artist_name, track_name, popularity
+FROM bit_db.Spotifydata
+GROUP BY artist_name, track_name
+ORDER BY popularity DESC
+LIMIT 10;
+--artist_name	track_name	popularity
+Doja Cat	Woman	95
+Ed Sheeran	Bad Habits	95
+Olivia Rodrigo	good 4 u	95
+Bad Bunny	Yonaguni	94
+Glass Animals	Heat Waves	94
+Doja Cat	Need to Know	93
+Måneskin	Beggin'	93
+The Weeknd	Blinding Lights	93
+Olivia Rodrigo	drivers license	92
+Olivia Rodrigo	traitor	92
+
+
+
