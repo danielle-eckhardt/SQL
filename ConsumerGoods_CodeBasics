@@ -1,0 +1,280 @@
+/*Provide the list of markets in which customer "Atliq Exclusive" operates its
+business in the APAC region.*/
+SELECT market
+FROM dim_customer
+WHERE customer = "Atliq Exclusive" AND region = "APAC";
+/*India
+Indonesia
+Japan
+Philiphines
+South Korea
+Australia
+Newzealand
+Bangladesh
+India*/
+
+
+/*What is the percentage of unique product increase in 2021 vs. 2020? The
+final output contains these fields,
+unique_products_2020
+unique_products_2021
+percentage_chg*/
+
+SELECT (t1.unique_products_2020/t2.unique_products_2021)*100 as percentage_chg, t1.unique_products_2020, t2.unique_products_2021
+FROM 
+(SELECT count(product_code) as unique_products_2020
+FROM fact_sales_monthly
+WHERE fiscal_year = 2020) as t1,
+(SELECT count(product_code) as unique_products_2021
+FROM fact_sales_monthly
+WHERE fiscal_year = 2021) as t2;
+/*59.7793	363523	608108*/
+
+SELECT 
+    (COUNT(CASE WHEN fiscal_year = 2020 THEN product_code END) / COUNT(CASE WHEN fiscal_year = 2021 THEN product_code END)) * 100 AS percentage_chg,
+    COUNT(CASE WHEN fiscal_year = 2020 THEN product_code END) AS unique_products_2020,
+    COUNT(CASE WHEN fiscal_year = 2021 THEN product_code END) AS unique_products_2021
+FROM 
+    fact_sales_monthly
+WHERE 
+    fiscal_year IN (2020, 2021)
+    
+/* In this query, I have used a conditional count to count the number of unique products in 2020 and 2021. 
+I have used a single subquery to do this instead of joining two separate subqueries.
+I have also added a filter to limit the results to only fiscal years 2020 and 2021, 
+which should improve performance if you have a large dataset.*/
+
+/*Provide a report with all the unique product counts for each segment and
+sort them in descending order of product counts. The final output contains
+2 fields,
+segment
+product_count
+*/
+
+SELECT count(product_code) as product, segment
+FROM dim_product
+GROUP BY segment
+ORDER BY count(product_code) DESC;
+/*129	Notebook
+116 	Accessories
+84	    Peripherals
+32		Desktop
+27		Storage
+9		Networking*/
+
+
+/*Follow-up: Which segment had the most increase in unique products in
+2021 vs 2020? The final output contains these fields,
+segment
+product_count_2020
+product_count_2021
+difference
+*/
+SELECT a.segment, a.product_count_2020, b.product_count_2021, (b.product_count_2021 - a.product_count_2020) as difference
+FROM
+(SELECT count(fact_sales_monthly.product_code) as product_count_2020, dim_product.segment as segment
+FROM fact_sales_monthly
+JOIN dim_product 
+ON fact_sales_monthly.product_code = dim_product.product_code
+WHERE fiscal_year = 2020
+GROUP BY dim_product.segment) a
+JOIN
+(SELECT count(fact_sales_monthly.product_code) as product_count_2021, dim_product.segment as segment
+FROM fact_sales_monthly
+JOIN dim_product 
+ON fact_sales_monthly.product_code = dim_product.product_code
+WHERE fiscal_year = 2021
+GROUP BY dim_product.segment) b
+ON 
+a.segment = b.segment
+ORDER BY difference;
+
+
+/* Yes, here are a few suggestions to improve the SQL query:
+
+Use table aliases to make the query easier to read.
+Use a single subquery to avoid repeating the same JOIN and WHERE clauses.
+Use COALESCE to handle cases where there is no 2020 data or 2021 data for a segment.
+Use a DESCENDING order to display the highest difference first.
+
+Use aliases for tables: Using aliases makes the SQL query easier to read and maintain, especially if the query involves multiple tables. 
+For example, you can use "a" and "b" as table aliases, which is a good start. 
+But you can also use more meaningful aliases that describe the tables, such as "sales_2020" and "sales_2021", or "products_2020" and "products_2021".
+
+Use a common table expression (CTE): Instead of joining two subqueries using the "JOIN" keyword, you can use a CTE to simplify the query. 
+A CTE is a named temporary result set that can be referred to within the main SQL statement. 
+Using a CTE can make the query more readable and easier to understand.
+
+Avoid subqueries: In this case, you can use a single query to get the product count for both years. 
+You can use a CASE statement to conditionally count the product based on the fiscal year.
+
+Use LEFT JOIN instead of INNER JOIN: If there are segments in 2021 that were not present in 2020, an INNER JOIN will exclude them from the result set. 
+You can use a LEFT JOIN instead to include all segments in the result set, even if there are no matching records in the other table.
+
+Use table aliases consistently: You can use table aliases consistently throughout the SQL query, 
+including in the SELECT statement and the ON clause.
+*/
+
+SELECT 
+  p.segment, 
+  COUNT(CASE WHEN fiscal_year = 2020 THEN s.product_code END) AS product_count_2020,
+  COUNT(CASE WHEN fiscal_year = 2021 THEN s.product_code END) AS product_count_2021,
+  COUNT(CASE WHEN fiscal_year = 2021 THEN s.product_code END) - COUNT(CASE WHEN fiscal_year = 2020 THEN s.product_code END) AS difference
+FROM 
+  fact_sales_monthly s
+  LEFT JOIN dim_product p ON s.product_code = p.product_code
+WHERE 
+  fiscal_year IN (2020, 2021)
+GROUP BY 
+  p.segment
+ORDER BY 
+  difference;
+
+
+/* Networking	11216	16929	5713
+Storage			22453	31977	9524
+Desktop			2026	30734	28708
+Peripherals		102878	141045	38167
+Accessories		112763	193598	80835
+Notebook		112187	193825	81638*/
+
+
+
+/*Get the products that have the highest and lowest manufacturing costs.
+The final output should contain these fields,
+product_code
+product
+manufacturing_cost*/
+
+SELECT a.product_code, a.product, a.cost, b.product_code, b.product, b.cost
+FROM
+(SELECT d.product_code, d.product, min(f.manufacturing_cost) as cost
+FROM fact_manufacturing_cost f
+JOIN dim_product d
+ON f.product_code = d.product_code
+GROUP BY d.product_code, d.product
+LIMIT 1) a
+JOIN
+(SELECT d.product_code, d.product, max(f.manufacturing_cost) as cost
+FROM fact_manufacturing_cost f
+JOIN dim_product d
+ON f.product_code = d.product_code
+GROUP BY d.product_code, d.product
+LIMIT 1) b
+ON 
+a.product_code = b.product_code;
+
+/*
+A0118150101	
+AQ Dracula HDD – 3.5 Inch SATA 6 Gb/s 5400 RPM 256 MB Cache	
+5.0207
+
+A0118150101
+AQ Dracula HDD – 3.5 Inch SATA 6 Gb/s 5400 RPM 256 MB Cache
+5.5172
+*/
+
+/* Generate a report which contains the top 5 customers who received an
+average high pre_invoice_discount_pct for the fiscal year 2021 and in the
+Indian market. The final output contains these fields,
+customer_code
+customer
+average_discount_percentage*/
+
+
+SELECT f.customer_code, d.customer, avg(f.pre_invoice_discount_pct) as average_discount_percentage
+FROM fact_pre_invoice_deductions f
+JOIN dim_customer d
+ON f.customer_code = d.customer_code
+WHERE f.fiscal_year = 2021 AND d.sub_zone = "India"
+GROUP BY d.customer_code, d.customer
+ORDER BY avg(f.pre_invoice_discount_pct) DESC
+LIMIT 5;
+/*
+90002009	Flipkart	0.30830000
+90002006	Viveks	0.30380000
+90002003	Ezone	0.30280000
+90002002	Croma	0.30250000
+90002016	Amazon 	0.29330000
+*/
+
+
+/*Get the complete report of the Gross sales amount for the customer “Atliq
+Exclusive” for each month. This analysis helps to get an idea of low and
+high-performing months and take strategic decisions.
+The final report contains these columns:
+Month
+Year
+Gross sales Amount*/
+
+SELECT extract(year from date) as year, extract(month from date) as month, sum(fgp.gross_price * fsm.sold_quantity) as GrossSalesAmount
+FROM fact_gross_price fgp
+JOIN fact_sales_monthly fsm
+ON fgp.product_code = fsm.product_code
+JOIN dim_customer dm
+ON dm.customer_code = fsm.customer_code
+WHERE dm.customer = "Atliq Exclusive"
+GROUP BY year, month;
+
+
+/* In which quarter of 2020, got the maximum total_sold_quantity? The final
+output contains these fields sorted by the total_sold_quantity,
+Quarter
+total_sold_quantity
+*/
+
+SELECT quarter(date), sum(sold_quantity) as total_sold_quantity
+FROM fact_sales_monthly
+WHERE fiscal_year = 2020
+GROUP BY quarter(date)
+ORDER BY sum(sold_quantity) DESC;
+
+/*
+4	8425822
+3	5246770
+1	3704398
+2	3395899
+*/
+
+
+/*Which channel helped to bring more gross sales in the fiscal year 2021
+and the percentage of contribution? The final output contains these fields,
+channel
+gross_sales_mln
+percentage*/
+
+SELECT d.channel, sum(fgp.gross_price * fsm.sold_quantity) as gross_sales, (sum(fgp.gross_price * fsm.sold_quantity/sum(sum(fgp.gross_price * fsm.sold_quantity))) as percent_contrib
+FROM dim_customer d
+JOIN fact_sales_monthly fsm
+ON d.customer_code = fsm.customer_code
+JOIN fact_gross_price fgp
+ON fgp.product_code = fsm.product_code
+WHERE fsm.fiscal_year = 2021
+GROUP BY d.channel;
+
+
+/*Get the Top 3 products in each division that have a high
+total_sold_quantity in the fiscal_year 2021? The final output contains these
+fields,
+division
+product_code
+codebasics.io
+product
+total_sold_quantity
+rank_order
+*/
+
+SELECT d.division, d.product_code, d.product, sum(fsm.sold_quantity) as total_sold_quantity, rank () over (order by sum(fsm.sold_quantity)) as rank_no
+FROM fact_sales_monthly fsm
+JOIN dim_product d
+ON fsm.product_code = d.product_code
+WHERE fiscal_year = 2021
+GROUP BY d.division, d.product_code, d.product
+ORDER BY total_sold_quantity DESC
+LIMIT 3;
+
+/*
+N & S	A6720160103	AQ Pen Drive 2 IN 1	701373	334
+N & S	A6818160202	AQ Pen Drive DRC	688003	333
+N & S	A6819160203	AQ Pen Drive DRC	676245	332
+*/
