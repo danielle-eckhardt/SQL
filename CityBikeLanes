@@ -1,0 +1,10 @@
+1. Let's say you work as a data analyst for your city, and your boss wants a list of all the bike lanes that have an average safety rating of 4.0 or higher.
+She also wants to see the average safety rating for each of those bike lanes, and a label that says "Safe Lane".
+
+WITH ar as
+(SELECT street, avg(safetyrating) as avg_r
+FROM CityBikeLanes
+GROUP BY street)
+SELECT street, avg_r, 'Safe Lane' as 'Label'
+FROM ar
+WHERE avg_r >= 4.0;
